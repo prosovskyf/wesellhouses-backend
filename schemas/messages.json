@@ -1,0 +1,132 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "messageThread": {
+            "$id": "/messageThread",
+            "description": "Thread which contains messages between agent and user",
+            "title": "Message thread",
+            "type": "object",
+            "properties": {
+                "subject": {
+                    "type": "string",
+                    "description": "Subject generated based on property name"
+                },
+                "agent_name": {
+                    "type": "string",
+                    "description": "Username of the registered agent of the property"
+                },
+                "user_name": {
+                    "type": "string",
+                    "description": "Username of the registered user"
+                },
+                "updated_time": {
+                    "type": "string",
+                    "description": "Time of last message in this thread"
+                },
+                "property_id": {
+                    "type": "integer",
+                    "description": "ID of the property user asks"
+                }
+            },
+            "additionalProperties": false
+        },
+        "message": {
+            "$id": "/message",
+            "description": "Individual message in the thread",
+            "title": "Message",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Actual message, encrypted when proccessed, decrypted on output"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "Author of specified message"
+                },
+                "message_thread": {
+                    "type": "integer",
+                    "description": "ID of the thread"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Date of the message"
+                },
+                "property_id": {
+                    "type": "integer",
+                    "description": "ID of the property user asks"
+                }
+            },
+            "additionalProperties": false
+        },
+        "messageView": {
+            "$id": "/messageView",
+            "description": "View message",
+            "title": "Message view",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Actual message, encrypted when proccessed, decrypted on output"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "Author of specified message"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Date of the message"
+                }
+            },
+            "additionalProperties": false
+        },
+        "messageSendFirst": {
+            "$id": "/messageSendFirst",
+            "description": "Send first message",
+            "title": "Sending first message",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Actual message, encrypted when proccessed, decrypted on output"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "Author of specified message"
+                },
+                "message_thread": {
+                    "type": "integer",
+                    "description": "ID of the thread"
+                },
+                "property_id": {
+                    "type": "integer",
+                    "description": "ID of the property user asks"
+                }
+            },
+            "additionalProperties": false,
+            "required": ["message", "property_id"]
+        },
+        "messageSend": {
+            "$id": "/messageSend",
+            "description": "Send message",
+            "title": "Sending message",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Actual message, encrypted when proccessed, decrypted on output"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "Author of specified message"
+                },
+                "message_thread": {
+                    "type": "integer",
+                    "description": "ID of the thread"
+                }
+            },
+            "additionalProperties": false,
+            "required": ["message"]
+        }
+    }
+}

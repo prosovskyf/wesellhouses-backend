@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/zoopla.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/zoopla.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* A module with defined api endpoints for managing zoopla data
+* @module routes/zoopla
+* @author Filip Prosovsky
+*/
+
+/** Package definitions */
+const Router = require('koa-router');
+const bodyParser = require('koa-bodyparser');
+const router = Router({ prefix: '/api/v1/admin/properties/data' });
+const fetch = require('node-fetch');
+require('dotenv').config();
+
+/** Load other modules */
+const zoopla = require('../models/zoopla.js');
+const auth = require('../controllers/auth');
+
+/** Route endpoints */
+router.post('/', auth, bodyParser(), getPrices);
+
+
+/**
+ * Function to get zoopla data
+ * Get postcode and based on that checks if any data associated with this postcode are in DB
+ * If not, fetch the data from Zoopla API and store it in formated way to own DB
+ * @param {object} ctx - Koa req/res context object
+ * @returns {integer | object | string} object - zoopla data, string - message, integer - http status
+ */
+async function getPrices(ctx) {
+    let api_key = process.env.zoopla_key;
+    let postcode = ctx.request.body.postcode;
+    try {
+        let data = await zoopla.getData(postcode);
+        if (data.length > 0) {
+            ctx.status = 200;
+            ctx.body = data[0];
+        }
+        else {
+            let url = 'https://api.zoopla.co.uk/api/v1/average_area_sold_price.json?'
+            url = url + `postcode=${postcode}&amp;output_type=county&amp;api_key=${api_key}`;
+            let zipData = {
+                postcode: postcode,
+                average_sold_price_1year: '',
+                average_sold_price_3year: '',
+                average_sold_price_5year: '',
+                average_sold_price_7year: '',
+                number_of_sales_1year: '',
+                number_of_sales_3year: '',
+                number_of_sales_7year: '',
+                number_of_sales_5year: '',
+                county: '',
+                turnover: '',
+            };
+            let getData = async url => {
+                let response = await fetch(url);
+                let json = await response.json()
+                    .then(obj => {
+                        return obj
+                    })
+                    .catch(e => console.error(e.stack));
+                return json
+            };
+            let online = await getData(url)
+            let x;
+            for (x in zipData) {
+                if (online[x]) {
+                    zipData[x] += online[x];
+                }
+            }
+            await zoopla.createData(zipData)
+            ctx.status = 200;
+            ctx.body = zipData;
+        }
+    }
+    catch (e) {
+        ctx.status = 500;
+        ctx.body = 'Problem occured, try again'
+    }
+}
+
+module.exports = router;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_crypt.html">helpers/crypt</a></li><li><a href="module-helpers_db.html">helpers/db</a></li><li><a href="module-helpers_isAgent.html">helpers/isAgent</a></li><li><a href="module-models_agents.html">models/agents</a></li><li><a href="module-models_files.html">models/files</a></li><li><a href="module-models_messages.html">models/messages</a></li><li><a href="module-models_properties.html">models/properties</a></li><li><a href="module-models_propertiesAgent.html">models/propertiesAgent</a></li><li><a href="module-models_propertyCategory.html">models/propertyCategory</a></li><li><a href="module-models_propertyFeatures.html">models/propertyFeatures</a></li><li><a href="module-models_propertyViews.html">models/propertyViews</a></li><li><a href="module-models_signup.html">models/signup</a></li><li><a href="module-models_verification.html">models/verification</a></li><li><a href="module-models_zoopla.html">models/zoopla</a></li><li><a href="module-permissions_agents.html">permissions/agents</a></li><li><a href="module-permissions_categories.html">permissions/categories</a></li><li><a href="module-permissions_features.html">permissions/features</a></li><li><a href="module-permissions_messages.html">permissions/messages</a></li><li><a href="module-permissions_propertiesAgent.html">permissions/propertiesAgent</a></li><li><a href="module-routes_agents.html">routes/agents</a></li><li><a href="module-routes_categories.html">routes/categories</a></li><li><a href="module-routes_features.html">routes/features</a></li><li><a href="module-routes_files.html">routes/files</a></li><li><a href="module-routes_login.html">routes/login</a></li><li><a href="module-routes_messages.html">routes/messages</a></li><li><a href="module-routes_properties.html">routes/properties</a></li><li><a href="module-routes_propertiesAgent.html">routes/propertiesAgent</a></li><li><a href="module-routes_signup.html">routes/signup</a></li><li><a href="module-routes_verification.html">routes/verification</a></li><li><a href="module-routes_zoopla.html">routes/zoopla</a></li><li><a href="module-scripts_hash_signupcode.html">scripts/hash_signupcode</a></li><li><a href="module-strategies_basicAuth.html">strategies/basicAuth</a></li><li><a href="module-strategies_jwt.html">strategies/jwt</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Tue Dec 01 2020 18:24:08 GMT+0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

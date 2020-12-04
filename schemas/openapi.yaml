@@ -1,0 +1,1212 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: We Sell Houses API Documentation
+  description: API for property management and communication between user and property agent
+  contact:
+    name: Filip Prosovsky
+    email: prosovskyf@uni.coventry.ac.uk
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'https://observe-prime.codio-box.uk/api/v1'
+    description: Development server for this application api
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    BearerAuth:
+      type: http
+      scheme: bearer
+tags:
+  - name: Agents
+    description: User management API for both users and agents
+  - name: Properties
+    description: View and perform CRUD operations on properties
+  - name: Categories
+    description: View and perform CRUD operations on categories
+  - name: Features
+    description: View and perform CRUD operations on features
+  - name: Files
+    description: CRUD operations for pictures and videos
+  - name: Messages
+    description: View and perform CRUD operation with message thread and messages
+  - name: Verification
+    description: Token verification for account activation and password reset
+  - name: Zoopla
+    description: CR operations to view zoopla data from DB or fetch from Zoopla and store in DB
+paths:
+    /signup:
+      summary: Signup individual user
+      description: This resource registers new user/agent to the system
+      post:
+        tags:
+          - Agents
+        description:
+          Create a new user/agent account.
+        requestBody:
+          description: User data during registration
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./agents.json#/definitions/agent
+        responses:
+          '200':
+            description: User/Agent created, verification link sent to email
+          '400':
+            description: Wrong values
+    /login:
+      summary: Login/Reset password
+      description: >
+        This resource manages login and reset password by sending token to email
+      post:
+        tags:
+          - Agents
+        description:
+          Login
+        security:
+          - BasicAuth: []
+        requestBody:
+          description: Login user into application
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./agents.json#/definitions/agentLogin
+        responses:
+          '200':
+            description: User logged in, send back JWT and user role, id, username
+            content:
+              application/json:
+                schema:
+                  type: object
+          '409':
+            description: Account not activated, link to re-send activation link
+            content:
+              application/json:
+                schema:
+                  type: object
+    /login/reset:
+      post:
+        tags:
+          - Agents
+        description:
+          Reset password link
+        requestBody:
+          description: Username or email
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                properties:
+                  user:
+                    type: string
+                    description: username/email
+                required:
+                  - user
+        responses:
+          '200':
+            description: Link to reset password sent to email
+          '404':
+            description: Username/email does not exist
+    /user/profile:
+      summary: User management
+      description: This resource manages user profile and avatar picture
+      get:
+        tags:
+          - Agents
+        description:
+          Get user profile based on agentid in JWT token
+        security:
+          - BearerAuth: []
+        responses:
+          '200':
+            description: View of user profile
+            content:
+              application/json:
+                schema:
+                  $ref: ./agents.json#/definitions/agentProfile
+          '400':
+            description: Error for bad request
+          '403':
+            description: Not authorized to view this profile
+          '404':
+            description: Not found
+    /user/updateinfo:
+      put:
+        tags:
+          - Agents
+        description:
+          Update user based on agentid in JWT token
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Updated information
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./agents.json#/definitions/agentUpdate
+        responses:
+          '201':
+            description: Updated information sent back
+            content:
+              application/json:
+                schema:
+                  $ref: ./agents.json#/definitions/agentUpdate
+          '400':
+            description: Wrong values detected and catched in error
+          '403':
+            description: Not authorized to view this profile
+    /user/changepass:
+      put:
+        tags:
+          - Agents
+        description:
+          Change user password
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Update information
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                properties:
+                  secret:
+                    type: string
+                required:
+                  - secret
+        responses:
+          '200':
+            description: Changed password
+          '400':
+            description: Not fulfiled minumum requirements for password
+          '403':
+            description: Wrong current password or not authorized
+    /user/avatar:
+      put:
+        tags:
+          - Agents
+        description:
+          Upload user avatar based on agentid in JWT token
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Picture
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  avatar:
+                    type: object
+                    items:
+                      type: string
+                      format: binary
+                required:
+                  - avatar
+        responses:
+          '200':
+            description: Picture uploaded, return picture path
+          '403':
+            description: Not authorized
+      delete:
+        tags:
+          - Agents
+        description:
+          Delete user avatar based on agentid in JWT token
+        security:
+          - BearerAuth: []
+        responses:
+          '200':
+            description: Picture deleted
+          '403':
+            description: Not authorized
+    /properties:
+      summary: Property view
+      description: This resource manages view of properties
+      parameters:
+      - in: query
+        name: direction
+        schema:
+          type: string
+        required: false
+        description: Order property by date created ASC/DESC
+      - in: query
+        name: features
+        schema:
+          type: string
+        required: false
+        description: Filter properties by features
+      - in: query
+        name: category
+        schema:
+          type: string
+        required: false
+        description: Filter properties by category
+      get:
+        tags:
+          - Properties
+        description:
+          Get all public properties
+        parameters:
+          - in: query
+            name: query
+            schema:
+              type: string
+            required: false
+            description: Query to filter properties
+        responses:
+          '200':
+            description: Object with properties in array
+            content:
+              application/json:
+                schema:
+                  $ref: ./properties.json#/definitions/propertyView
+          '404':
+            description: Not found
+    /properties/{id}:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the property
+      get:
+        tags:
+          - Properties
+        description:
+          Get specific property by id
+        responses:
+          '200':
+            description: Object with property information
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    property:
+                      $ref: ./properties.json#/definitions/propertyView
+                    agent:
+                      $ref: ./agents.json#/definitions/agentProfile
+          '400':
+            description: Wrong id or format of id
+          '404':
+            description: Not found
+    /admin/properties:
+      summary: Admin properties
+      description: This resource manages agent's property view and operations
+      get:
+        tags:
+          - Properties
+        description:
+          Get all private properties for specific agent
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: query
+            name: direction
+            schema:
+              type: string
+            required: false
+            description: Order property by date created ASC/DESC
+          - in: query
+            name: features
+            schema:
+              type: string
+            required: false
+            description: Filter properties by features
+          - in: query
+            name: category
+            schema:
+              type: string
+            required: false
+            description: Filter properties by category
+        responses:
+          '200':
+            description: Object with properties in array
+            content:
+              application/json:
+                schema:
+                  $ref: ./properties.json#/definitions/propertyView
+          '403':
+            description: Not authorized
+          '404':
+            description: Not found
+      post:
+        tags:
+          - Properties
+        description:
+          Create property listing 
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Property information
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./properties.json#/definitions/property
+        responses:
+          '201':
+            description: Object with created property data
+            content:
+              application/json:
+                schema:
+                  $ref: ./properties.json#/definitions/propertyView
+          '400':
+            description: Wrong values entered
+          '403':
+            description: Not authorized
+    /admin/properties/{id}:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the property
+      get:
+        tags:
+          - Properties
+        description:
+          Get specific agent's property by id
+        security:
+          - BearerAuth: []
+        responses:
+          '200':
+            description: Object with property information
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    property:
+                      $ref: ./properties.json#/definitions/propertyView
+          '403':
+            description: Not authorized
+          '404':
+            description: Not found
+      put:
+        tags:
+          - Properties
+        description:
+          Update specific property
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Property information
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./properties.json#/definitions/property
+        responses:
+          '201':
+            description: Property updated
+          '400':
+            description: Wrong values entered / Wrong ID
+          '403':
+            description: Not authorized
+      delete:
+        tags:
+          - Properties
+        description:
+          Delete specific property, all images and features associated
+        security:
+          - BearerAuth: []
+        responses:
+          '201':
+            description: Property deleted
+          '400':
+            description: Wrong ID input
+          '403':
+            description: Not authorized
+    /admin/properties/hot:
+      get:
+        tags:
+          - Properties
+        description:
+          Get properties marked as high priority
+        security:
+          - BearerAuth: []
+        responses:
+          '200':
+            description: Object with property information
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    property:
+                      $ref: ./properties.json#/definitions/propertyView
+          '403':
+            description: Not authorized
+          '404':
+            description: Not found
+    /category:
+      summary: Categories
+      description: This resource manages categories
+      get:
+        tags:
+          - Categories
+        description:
+          Get all categories
+        responses:
+          '200':
+            description: Object with categories in array
+            content:
+              application/json:
+                schema:
+                  $ref: ./categories.json#/definitions/categoryView
+          '404':
+            description: Not found
+      post:
+        tags:
+          - Categories
+        description:
+          Create category
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Category information
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./categories.json#/definitions/category
+        responses:
+          '201':
+            description: ID of created category
+            content:
+              application/json:
+                schema:
+                  type: integer
+          '400':
+            description: Wrong values entered
+          '403':
+            description: Not authorized
+    /category/{id}:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the property
+      get:
+        tags:
+          - Categories
+        description:
+          Get specific category
+        responses:
+          '200':
+            description: Object with category information
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    property:
+                      $ref: ./categories.json#/definitions/categoryView
+          '404':
+            description: Not found
+      put:
+        tags:
+          - Categories
+        description:
+          Update specific category
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Category information
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./categories.json#/definitions/category
+        responses:
+          '201':
+            description: Category updated
+          '400':
+            description: Wrong values entered / Wrong ID
+          '403':
+            description: Not authorized
+      delete:
+        tags:
+          - Categories
+        description:
+          Delete specific category, image of category is deleted as well
+        security:
+          - BearerAuth: []
+        responses:
+          '201':
+            description: Category deleted
+          '400':
+            description: Category is linked to existing property / Wrong ID input
+          '403':
+            description: Not authorized
+          '404':
+            description: Category was not found
+    /features:
+      summary: Features
+      description: This resource manages features
+      get:
+        tags:
+          - Features
+        description:
+          Get all features
+        responses:
+          '200':
+            description: Features in array
+            content:
+              application/json:
+                schema:
+                  $ref: ./features.json#/definitions/featureView
+          '404':
+            description: Not found
+    /features/{id}:
+      post:
+        parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the property
+        tags:
+          - Features
+        description:
+          Create feature
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Feature data
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./features.json#/definitions/feature
+        responses:
+          '201':
+            description: Feature created
+          '400':
+            description: Wrong values entered
+          '403':
+            description: Not authorized
+      delete:
+        parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the feature
+        tags:
+          - Features
+        description:
+          Delete specific feature
+        security:
+          - BearerAuth: []
+        responses:
+          '201':
+            description: Feature deleted
+          '400':
+            description: Wrong ID input
+          '403':
+            description: Not authorized
+    /features/all/{id}:
+      delete:
+        parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the property
+        tags:
+          - Features
+        description:
+          Delete all features for specific property
+        security:
+          - BearerAuth: []
+        responses:
+          '201':
+            description: All features deleted
+          '400':
+            description: Wrong ID input
+          '403':
+            description: Not authorized
+    /files:
+      summary: Files
+      description: >
+        This resource manages files upload, get names and files deletion
+        Checking if logged in user is agent with checkRole middleware
+      get:
+        parameters:
+        - in: query
+          name: path
+          schema:
+            type: string
+          required: true
+          description: URI path to file folder
+        tags:
+          - Files
+        description:
+          Get all file names in specific folder
+        responses:
+          '200':
+            description: File names
+            content:
+              application/json:
+                schema:
+                  type: string
+          '404':
+            description: Not found
+    /files/upload/category/image:
+      put:
+        tags:
+          - Files
+        description:
+          Upload category image and store path to database
+        parameters:
+        - in: header
+          name: category_id
+          schema:
+            type: integer
+            description: Category ID
+          required: true
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Picture
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  image:
+                    type: object
+                    items:
+                      type: string
+                      format: binary
+                required:
+                  - image
+        responses:
+          '200':
+            description: Picture uploaded
+          '401':
+            description: Not authorized
+    /files/upload/property/images:
+      put:
+        tags:
+          - Files
+        description:
+          Upload property images and store path to database
+        parameters:
+        - in: header
+          name: property_id
+          schema:
+            type: integer
+            description: Property ID
+          required: true
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Pictures
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  image:
+                    type: object
+                    items:
+                      type: string
+                      format: binary
+                required:
+                  - image
+        responses:
+          '200':
+            description: Pictures uploaded
+          '401':
+            description: Not authorized
+    /files/upload/property/video:
+      put:
+        tags:
+          - Files
+        description:
+          Upload property video and store path to database
+        parameters:
+        - in: header
+          name: property_id
+          schema:
+            type: integer
+            description: Property ID
+          required: true
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Video
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  video:
+                    type: object
+                    items:
+                      type: string
+                      format: binary
+                required:
+                  - video
+        responses:
+          '200':
+            description: Video uploaded
+          '401':
+            description: Not authorized
+    /files/delete/category/image:
+      delete:
+        tags:
+          - Files
+        description:
+          Delete category image and path from database
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Get category id, file name and path to the file
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    description: Category ID
+                  name:
+                    type: string
+                    description: Category name
+                  path:
+                    type: string
+                    description: path where file is to be deleted
+                required:
+                  - id
+                  - name
+                  - path
+        responses:
+          '200':
+            description: Image deleted
+          '401':
+            description: Not authorized
+    /files/delete/property/image:
+      delete:
+        tags:
+          - Files
+        description:
+          Delete property images and path stored in database
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Get property id and file name
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    description: Property ID
+                  imgName:
+                    type: string
+                    description: File name
+                required:
+                  - id
+                  - imgName
+        responses:
+          '200':
+            description: Image deleted
+          '401':
+            description: Not authorized
+    /files/delete/property/video:
+      delete:
+        tags:
+          - Files
+        description:
+          Delete property video and path stored in database
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Get property id and file name
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    description: Property ID
+                  videoName:
+                    type: string
+                    description: File name
+                required:
+                  - id
+                  - videoName
+        responses:
+          '200':
+            description: Video deleted
+          '401':
+            description: Not authorized
+    /admin/properties/data:
+      summary: Zoopla data
+      description: >
+        Get zoopla data from database if they were already fetched before or fetch 
+        new ones which are not yet stored in the database
+      post:
+        tags:
+          - Zoopla
+        description:
+          Get Zoopla data based on Postcode
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Postcode
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  postcode:
+                    type: string
+                    description: Postcode
+                required:
+                  - postcode
+        responses:
+          '200':
+            description: Object with zoopla data
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    property:
+                      $ref: ./zoopla.json#/definitions/zoopla
+          '401':
+            description: Not authorized
+    /verification:
+      summary: Verification
+      description: >
+        This resource manages account verification, password reset
+        and change password chain after getting reset link
+      get:
+        tags:
+          - Verification
+        description:
+          Verify activation token sent during signup
+        parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+            description: Username
+          required: true
+        - in: query
+          name: token
+          schema:
+            type: string
+            description: Verification token 
+          required: true
+        responses:
+          '200':
+            description: Account activated
+            content:
+              application/json:
+                schema:
+                  type: string
+          "400":
+            description: Not valid token
+          '498':
+            description: Token expired
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    text:
+                      type: string
+                    link: 
+                      type: string
+                      description: Generate link to resend new activation link to email
+    /verification/resend:
+      get:
+        tags:
+          - Verification
+        description:
+          Resend activation link to email
+        parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+            description: Username
+          required: true
+        responses:
+          '200':
+            description: Activation link sent, need to be confirmed in 48 hours
+    /verification/resetpass:
+      get:
+        tags:
+          - Verification
+        description:
+          Validate token after user clicked on reset link
+        parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+            description: Username
+          required: true
+        - in: query
+          name: token
+          schema:
+            type: string
+            description: Verification token
+          required: true 
+        responses:
+          '200':
+            description: Validated, fill password and will move to /verification/changepass resource
+          "400":
+            description: Not valid token
+    /verification/changepass:
+      post:
+        tags:
+          - Verification
+        description:
+          Change user entered password after reset
+        parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+            description: Username
+          required: true
+        - in: query
+          name: token
+          schema:
+            type: string
+            description: Verification token
+          required: true 
+        requestBody:
+          description: Password
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  secret:
+                    type: string
+                    description: Actual password
+                required:
+                  - secret
+        responses:
+          '200':
+            description: Password changed, redirection to login
+          '400':
+            description: Not valid request
+    /messages:
+      summary: Messages
+      description: >
+        This resource manages threads and messages between user and agent
+      get:
+        tags:
+          - Messages
+        description: Get message threads based on username stored in JWT
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Threads data
+            content:
+              application/json:
+                schema:
+                  $ref: ./messages.json#/definitions/messageThread
+          "400":
+            description: Bad request
+          '404':
+            description: No threads for user
+      post:
+        tags:
+          - Messages
+        description: Send first message from user to agent
+        security:
+        - BearerAuth: []
+        requestBody:
+          description: Message
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./messages.json#/definitions/messageSendFirst
+        responses:
+          '201':
+            description: First message was sent to agent
+          '400':
+            description: Bad input / User already has thread with that agent about specific property
+    /messages/{id}:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the message thread
+      get:
+        tags:
+          - Messages
+        description: Get messages in specific thread
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Messages and thread data
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    messages:
+                      $ref: ./messages.json#/definitions/messageView
+                    thread:
+                      $ref: ./messages.json#/definitions/messageThread
+          '404':
+            description: No messages
+      post:
+        tags:
+          - Messages
+        description: Send message
+        security:
+        - BearerAuth: []
+        requestBody:
+          description: Message
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ./messages.json#/definitions/messageSend
+        responses:
+          '201':
+            description: Message was sent
+          '400':
+            description: Bad input
+      delete:
+        tags:
+          - Messages
+        description: >
+          Delete thread for user/agent. This works independant on each other so user/agent can 
+          delete thread but other side can still see it until second party removes that thread as well.
+          After that whole thread is deleted from database
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Thread was deleted
+          '400':
+            description: Bad input
+          '404':
+            description: No thread found to be deleted
+    /messages/{id}/archive:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the message thread
+      put:
+        tags:
+          - Messages
+        description: Archive thread
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Conversation was archived
+          '400':
+            description: Bad input
+          '404':
+            description: No converation found
+    /messages/archive/:
+      get:
+        tags:
+          - Messages
+        description: Get archived message threads based on username stored in JWT
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Archived threads data
+            content:
+              application/json:
+                schema:
+                  $ref: ./messages.json#/definitions/messageThread
+          "400":
+            description: Bad request
+          '404':
+            description: No threads for user
+    /messages/archive/{id}:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric id of the message thread
+      get:
+        tags:
+          - Messages
+        description: Get archived messages in specific thread
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Archived messages and thread data
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    messages:
+                      $ref: ./messages.json#/definitions/messageView
+                    thread:
+                      $ref: ./messages.json#/definitions/messageThread
+          '400':
+            description: Bad input
+          '404':
+            description: No messages
+      put:
+        tags:
+          - Messages
+        description: Unarchive message thread
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: Removed from archive
+          '400':
+            description: Bad input
+          '404':
+            description: Not found
+
+
+          
+

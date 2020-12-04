@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "zoopla": {
+            "$id": "/zoopla",
+            "description": "Zoopla data about property",
+            "title": "Zoopla",
+            "type": "object",
+            "properties": {
+                "postcode": {
+                    "$id": "#/properties/postcode",
+                    "type": "string",
+                    "title": "Postcode",
+                    "description": "Postcode of the property user wants data"
+                },
+                "average_sold_price_1year": {
+                    "$id": "#/properties/average_sold_price_1year",
+                    "type": "integer",
+                    "title": "Average Sold Price 1 year",
+                    "description": "Average sold price in 1 year for selected location"
+                },
+                "average_sold_price_3year": {
+                    "$id": "#/properties/average_sold_price_3year",
+                    "type": "integer",
+                    "title": "Average sold price 3 years",
+                    "description": "Average sold price in 3 years for selected location"
+                },
+                "average_sold_price_5year": {
+                    "$id": "#/properties/average_sold_price_5year",
+                    "type": "integer",
+                    "title": "Average sold price 5 years",
+                    "description": "Average sold price in 5 years for selected location"
+                },
+                "average_sold_price_7year": {
+                    "$id": "#/properties/average_sold_price_7year",
+                    "type": "integer",
+                    "title": "Average sold price 7 years",
+                    "description": "Average sold price in 7 years for selected location"
+                },
+                "number_of_sales_1year": {
+                    "$id": "#/properties/number_of_sales_1year",
+                    "type": "integer",
+                    "title": "Number of sales in 1 year",
+                    "description": "Number of sales in 1 year for selected location"
+                },
+                "number_of_sales_3year": {
+                    "$id": "#/properties/number_of_sales_3year",
+                    "type": "integer",
+                    "title": "Number of sales in 3 years",
+                    "description": "Number of sales in 3 years for selected location"
+                },
+                "number_of_sales_5year": {
+                    "$id": "#/properties/number_of_sales_5year",
+                    "type": "integer",
+                    "title": "Number of sales in 5 years",
+                    "description": "Number of sales in 3 years for selected location"
+                },
+                "number_of_sales_7year": {
+                    "$id": "#/properties/number_of_sales_7year",
+                    "type": "integer",
+                    "title": "Number of sales in 7 years",
+                    "description": "Number of sales in 3 years for selected location"
+                },
+                "county": {
+                    "$id": "#/properties/county",
+                    "type": "string",
+                    "title": "County",
+                    "description": "County location of corresponding data"
+                },
+                "turnover": {
+                    "$id": "#/properties/turnover",
+                    "type": "number",
+                    "title": "Turnover",
+                    "description": "Turnover for selected location"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

@@ -1,0 +1,164 @@
+LOG:
+1. Master initial commit
+    - setting up NPM, installing initial needed(known) packages, DB connection (in helpers folder), .env;
+    - npm start command = script to nodemon index.js;
+    - next = implemented features will in different branches;
+    - added sql-scripts folder as database was created (master)
+
+2. Properties branch 
+    - added functionality to getAll properties with pagination, feature and category selection
+    - added functionality to getById property
+    - added functionality to create property
+    - added functionality to update property
+    - exported add view function to separate file to avoid +1 when property is updated
+    - added functionality delete property
+    - TESTING COMPLETED for properties
+
+3. Category branch
+    - added manipulation with categories (add, update, delete)
+    - TESTING COMPLETED for categories
+
+4.  Users branch
+    - added signup models
+    - implemented basicAuth strategy
+    - use basicAuth when log in
+    - password and email validation
+    - password encryption to DB
+    - created signup table with hashed Sign Up code in it
+    - comparing sing up code
+    - TESTING COMPLETED for users
+
+5. Properties2 branch
+    - changes in models properties = diferentiate public, agent view and operations
+    - added "show published only" for public
+    - agents can see their published and unpublished properties
+    - show high priority items option
+    - basicAuth + agentid header to manipulate, will be handled better later
+    - added authentication to manipulate with categories
+    - TESTING COMPLETED for Properties2
+
+6. Messages branch
+    - move crypt to separate file from signup models
+    - send message to agent
+    - encrypt the message so it is safe in DB (.env secret)  - Fixed
+    - decryption of messages for output
+    - manipulation with messages - Fixed
+    - TESTING COMPLETED for Messages
+    
+7. JWT branch
+    - implementing jwt auth strategy
+    - send token to agent for further use
+    - jwt check 
+    - User go through basic auth, get token (username, id in payload)
+    - TESTIN COMPLETED for JWT
+
+8. Upload/download branch
+    - upload images and video with specific name (type_$numberofnextfile)
+    - update/add/delete images
+    - upload/delete video
+    - adding comments
+    - TESTING COMPLETED for upload
+
+9. RBAC branch
+    - 9a.
+    - added change password for agents
+    - added view/change info for agents
+    - upload/delete agent avatar
+    - TESTING COMPLETED for 9a
+    - 9b.
+    - archiving/unarchiving/get archived messages
+    - TESTING COMPLETED for 9b
+    - 9c.
+    - create sql table with roles
+    - define agent role
+    - define global admin role
+    - TESTING COMPLETED for 9c
+    - 9d. User changes
+    - users stored in agents table w/ role user
+    - change in sing-up (if no code provided = role is user)
+    - set up permissions RBAC
+    - apply permissions for users/agents/admin
+    - new helper to check role for file upload
+    - apply permissions for categories
+    - TESTING COMPLETED for 9d
+    - TESTING COMPLETED for 9 branch
+
+10. Features branch
+    - search features implemented
+    - add create, delete, update feature per property
+    - add rbac for manipulation with features
+    - getById with features
+    - features view when property getbyid in admin panel
+    - change feature to text in sql script
+    - TESTING COMPLETED for features
+
+11. Email_verification branch
+    - add row verified in agents(users) table with default false
+    - add row verify_token and verify_token_expire
+    - deleted /strategies/verify.js and moved to models/agents
+    - implemented email verification link for 48 hours (using SendGrid)
+    - if expired, redirect to resend new one
+    - Implemented email verification for signup
+    - Implemented verified check in login, if user exists but not verified, redirect to resend code if expired
+    - Basic auth now used only in LOGIN, JWT used elsewhere except login
+    - TESTING COMPLETED for email_verification
+
+12. Password_reset branch
+    - implement password reset based on sending valid token as in email verification
+    - disable account when password reset requested
+    - email sent with token
+    - if valid, page with entering new password form will appear
+    - then setting up new password and enable account again
+    - TESTING COMPLETED for password_reset
+
+13. Messages2 branch
+    - implement "real-time" messaging but still following REST principles.
+      React will handle polling to get the newest messages
+    - major changes to DB schema
+    - table MESSAGE stores info about message thread, MESSAGES stores encrypted messages only with message_thread and author
+    - archive, get archived and delete messages [works independent on both user and agent]
+    - if both user and agent will delete the message (del_for_user and del_for_agent in DB boolean),
+      message will be deleted
+    - thread has info about last message inserted
+    - permissions for messages - addition to DB filtering
+    - TESTING COMPLETED for messages2
+
+14. Zoopla branch
+    - implement zoopla api to show average sold prices 
+    - based on postcode -- agent can choose from streets, towns, outcodes locations
+    - if stored in DB, get from there, otherwise get from api.zoopla and store in DB
+    - TESTING COMPLETED for zoopla
+
+15. Connecting branch
+    - set up cors
+    - modify file routes 
+    - get images name to frontend
+    - upload/ delete category images
+    - image conversion to png for thumbnail and img carousel
+    - change categories to search by name in query
+    - sign up and verification connected with frontend
+    - login changes for frontend done
+    - reset password chain
+    - TESTING COMPLETED for connecting
+
+16. Schema branch
+    - create json schema and validation
+    - basic linting code
+    - TESTING COMPLETED for schema
+
+17. Docs branch
+    - create API documentation
+    - create code documentation using JSDoc
+    - TESTING COMPLETED for docs
+
+18. Testing branch
+    - psql dump and mock testing database in script
+    - write tests using Jest/supertest
+    - eslint
+
+19. Docker branch
+    - dockerize
+    - final fixes
+    - description
+
+    

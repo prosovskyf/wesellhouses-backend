@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/signup.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/signup.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* A module with methods used in sign up process
+* @module models/signup
+* @author Filip Prosovsky
+* @see routes/* where these models are being used
+*/
+
+const db = require('../helpers/db.js')
+const bcrypt = require('bcrypt');
+
+/**
+ * Model to check if username already exists
+ * @param {string} string - username
+ * @returns {object} object - returning data
+ */
+exports.getUsername = async function getUsername(userInput) {
+    let sql = 'SELECT username FROM agents WHERE username = $1;';
+    let username = await db.query(sql, userInput)
+    .then(username => {
+        return username
+    })
+    .catch(e => console.error(e.stack));
+    return username;
+}
+
+/**
+ * Model to check if email already exists
+ * @param {string} string - email
+ * @returns {object} object - returning data
+ */
+exports.getEmail = async function getEmail(email) {
+    let sql = 'SELECT email FROM agents WHERE email = $1;';
+    let eMail = await db.query(sql, email)
+    .then(eMail => {
+        return eMail
+    })
+    .catch(e => console.error(e.stack));
+    return eMail;
+}
+
+/**
+ * Model to insert new user into DB
+ * @param {object} object - userdata
+ * @param {string} string - role
+ * @param {string} string - token
+ * @param {string} string - token expiration time
+ * @returns {string} string - returning username
+ */
+exports.signupAgent = async function signupAgent(userdata, role, token, expire) {
+    let sql = ('INSERT INTO agents(\${keys:name}, role, verify_token, verify_token_expire) \
+                VALUES(\${values:list}, \${role}, \${token}, \${expire}) \
+                RETURNING username;')
+    let obj = await db.query(sql, {
+        keys: Object.keys(userdata),
+        values: Object.values(userdata),
+        role: role,
+        token: token,
+        expire: expire
+    })
+    .then(obj => {
+        return obj
+    })
+    .catch(e => console.error(e.stack));
+    return obj
+}
+
+/**
+ * Model to compare encrypted signup code from database with user input
+ * @param {string} string - sign up code
+ * @returns {boolean} boolean - true/false if code matches
+ */
+exports.compareSecret = async function compareSecret(code) { 
+    let sql = 'SELECT code FROM signup WHERE id=1;';
+    let result = await db.query(sql)
+    .then(async passwordhash => {
+        let result = await bcrypt.compare(code,passwordhash[0].code)
+        return result
+    })
+    .catch(e => console.error(e.stack))
+    return result
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_crypt.html">helpers/crypt</a></li><li><a href="module-helpers_db.html">helpers/db</a></li><li><a href="module-helpers_isAgent.html">helpers/isAgent</a></li><li><a href="module-models_agents.html">models/agents</a></li><li><a href="module-models_files.html">models/files</a></li><li><a href="module-models_messages.html">models/messages</a></li><li><a href="module-models_properties.html">models/properties</a></li><li><a href="module-models_propertiesAgent.html">models/propertiesAgent</a></li><li><a href="module-models_propertyCategory.html">models/propertyCategory</a></li><li><a href="module-models_propertyFeatures.html">models/propertyFeatures</a></li><li><a href="module-models_propertyViews.html">models/propertyViews</a></li><li><a href="module-models_signup.html">models/signup</a></li><li><a href="module-models_verification.html">models/verification</a></li><li><a href="module-models_zoopla.html">models/zoopla</a></li><li><a href="module-permissions_agents.html">permissions/agents</a></li><li><a href="module-permissions_categories.html">permissions/categories</a></li><li><a href="module-permissions_features.html">permissions/features</a></li><li><a href="module-permissions_messages.html">permissions/messages</a></li><li><a href="module-permissions_propertiesAgent.html">permissions/propertiesAgent</a></li><li><a href="module-routes_agents.html">routes/agents</a></li><li><a href="module-routes_categories.html">routes/categories</a></li><li><a href="module-routes_features.html">routes/features</a></li><li><a href="module-routes_files.html">routes/files</a></li><li><a href="module-routes_login.html">routes/login</a></li><li><a href="module-routes_messages.html">routes/messages</a></li><li><a href="module-routes_properties.html">routes/properties</a></li><li><a href="module-routes_propertiesAgent.html">routes/propertiesAgent</a></li><li><a href="module-routes_signup.html">routes/signup</a></li><li><a href="module-routes_verification.html">routes/verification</a></li><li><a href="module-routes_zoopla.html">routes/zoopla</a></li><li><a href="module-scripts_hash_signupcode.html">scripts/hash_signupcode</a></li><li><a href="module-strategies_basicAuth.html">strategies/basicAuth</a></li><li><a href="module-strategies_jwt.html">strategies/jwt</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Tue Dec 01 2020 18:24:08 GMT+0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

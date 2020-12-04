@@ -1,0 +1,144 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "agent": {
+            "$id": "#agent",
+            "title": "Agent/User",
+            "description": "Register new agent/user",
+            "type": "object",
+            "properties": {
+                "firstname": {
+                    "description": "Firstname of the registered user",
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "Lastname of the registered user",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Unique username of the registered user",
+                    "type": "string"
+                },
+                "about": {
+                    "description": "Summary about user, mostly used for agents",
+                    "type": "string"
+                },
+                "picture_url": {
+                    "description": "Path to user avatar",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "phone": {
+                    "description": "Contact phone of user",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "Role determines the access in the app (user/agent)",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "Unique email of the user",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password for the user",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "username",
+                "email",
+                "password"
+            ],
+            "additionalProperties": false
+        },
+        "agentLogin": {
+            "$id": "#agentLogin",
+            "title": "User/Agent login",
+            "description": "Login user/agent",
+            "type": "object",
+            "properties": {
+                "username": {
+                    "description": "Unique username of the registered user",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password for the user",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "username",
+                "password"
+            ],
+            "additionalProperties": false
+        },
+        "agentProfile": {
+            "$id": "#agentProfile",
+            "title": "User profile",
+            "description": "Data visible in agent/user profile",
+            "type": "object",
+            "properties": {
+                "firstname": {
+                    "description": "Firstname of the registered user",
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "Lastname of the registered user",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Unique username of the registered user",
+                    "type": "string"
+                },
+                "about": {
+                    "description": "Summary about user, mostly used for agents",
+                    "type": "string"
+                },
+                "picture_url": {
+                    "description": "Path to user avatar",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "phone": {
+                    "description": "Contact phone of user",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "Unique email of the user",
+                    "type": "string"
+                }
+            }
+        },
+        "agentUpdate": {
+            "$id": "#agentUpdate",
+            "title": "Update user profile",
+            "description": "Update user/agent profile",
+            "type": "object",
+            "properties": {
+                "firstname": {
+                    "description": "Firstname of the registered user",
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "Lastname of the registered user",
+                    "type": "string"
+                },
+                "about": {
+                    "description": "Summary about user, mostly used for agents",
+                    "type": "string"
+                },
+                "picture_url": {
+                    "description": "Path to user avatar",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "phone": {
+                    "description": "Contact phone of user",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

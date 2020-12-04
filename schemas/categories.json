@@ -1,0 +1,56 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "category": {
+            "$id": "/category",
+            "title": "Category",
+            "description": "Property category",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Unique name of the category",
+                    "type": "string"
+                },
+                "description": {
+                    "default": null,
+                    "description": "Description for the category",
+                    "type": "string"
+                },
+                "image_url": {
+                    "default": null,
+                    "description": "Path to category thumbnail",
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "name"
+            ]
+        },
+        "categoryView": {
+            "$id": "/categoryView",
+            "title": "Category view",
+            "description": "Property category view",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Unique name of the category",
+                    "type": "string"
+                },
+                "description": {
+                    "default": null,
+                    "description": "Description for the category",
+                    "type": "string"
+                },
+                "image_url": {
+                    "default": null,
+                    "description": "Path to category thumbnail",
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

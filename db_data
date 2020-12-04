@@ -1,0 +1,812 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 13.1
+-- Dumped by pg_dump version 13.1
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: update_modified_column(); Type: FUNCTION; Schema: public; Owner: test
+--
+
+CREATE FUNCTION public.update_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+   NEW."modified" = now();
+   RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_modified_column() OWNER TO test;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: agents; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.agents (
+    id integer NOT NULL,
+    firstname character varying(32),
+    lastname character varying(64),
+    username character varying(24) NOT NULL,
+    about text,
+    dateregistered timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    password character varying(255) NOT NULL,
+    passwordsalt character varying(255),
+    email character varying(64) NOT NULL,
+    picture_url character varying(100),
+    phone character varying(15),
+    role character varying(16) DEFAULT 'user'::character varying NOT NULL,
+    verified boolean DEFAULT false NOT NULL,
+    verify_token text,
+    verify_token_expire timestamp without time zone
+);
+
+
+ALTER TABLE public.agents OWNER TO test;
+
+--
+-- Name: agents_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.agents_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.agents_id_seq OWNER TO test;
+
+--
+-- Name: agents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.agents_id_seq OWNED BY public.agents.id;
+
+
+--
+-- Name: categories; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.categories (
+    id integer NOT NULL,
+    name character varying(32) NOT NULL,
+    description text,
+    image_url character varying(100)
+);
+
+
+ALTER TABLE public.categories OWNER TO test;
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.categories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.categories_id_seq OWNER TO test;
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.categories_id_seq OWNED BY public.categories.id;
+
+
+--
+-- Name: features; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.features (
+    id integer NOT NULL,
+    feature text NOT NULL,
+    property_id integer NOT NULL
+);
+
+
+ALTER TABLE public.features OWNER TO test;
+
+--
+-- Name: features_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.features_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.features_id_seq OWNER TO test;
+
+--
+-- Name: features_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.features_id_seq OWNED BY public.features.id;
+
+
+--
+-- Name: message; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.message (
+    id integer NOT NULL,
+    property_id integer NOT NULL,
+    subject text NOT NULL,
+    agent_name character varying(24) NOT NULL,
+    user_name character varying(24) NOT NULL,
+    archived_agent boolean DEFAULT false NOT NULL,
+    archived_user boolean DEFAULT false NOT NULL,
+    del_for_user boolean DEFAULT false NOT NULL,
+    del_for_agent boolean DEFAULT false NOT NULL,
+    updated_time timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.message OWNER TO test;
+
+--
+-- Name: message_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.message_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.message_id_seq OWNER TO test;
+
+--
+-- Name: message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.message_id_seq OWNED BY public.message.id;
+
+
+--
+-- Name: messages; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.messages (
+    id integer NOT NULL,
+    date timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    message text NOT NULL,
+    message_thread integer NOT NULL,
+    author character varying(24) NOT NULL
+);
+
+
+ALTER TABLE public.messages OWNER TO test;
+
+--
+-- Name: messages_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.messages_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.messages_id_seq OWNER TO test;
+
+--
+-- Name: messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.messages_id_seq OWNED BY public.messages.id;
+
+
+--
+-- Name: properties; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.properties (
+    id integer NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    created timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    modified timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    image_url text,
+    video_url text,
+    published boolean DEFAULT false NOT NULL,
+    price integer NOT NULL,
+    high_priority boolean DEFAULT false,
+    agent_id integer NOT NULL,
+    category_id integer NOT NULL,
+    location character varying(32),
+    under_offer boolean DEFAULT false
+);
+
+
+ALTER TABLE public.properties OWNER TO test;
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.properties_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.properties_id_seq OWNER TO test;
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.properties_id_seq OWNED BY public.properties.id;
+
+
+--
+-- Name: roles; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.roles (
+    name character varying(32) NOT NULL,
+    description text
+);
+
+
+ALTER TABLE public.roles OWNER TO test;
+
+--
+-- Name: signup; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.signup (
+    id integer NOT NULL,
+    code text NOT NULL,
+    code_salt text NOT NULL
+);
+
+
+ALTER TABLE public.signup OWNER TO test;
+
+--
+-- Name: signup_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--
+
+CREATE SEQUENCE public.signup_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.signup_id_seq OWNER TO test;
+
+--
+-- Name: signup_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+--
+
+ALTER SEQUENCE public.signup_id_seq OWNED BY public.signup.id;
+
+
+--
+-- Name: views; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.views (
+    id bigint NOT NULL,
+    views bigint DEFAULT 0
+);
+
+
+ALTER TABLE public.views OWNER TO test;
+
+--
+-- Name: zoopla; Type: TABLE; Schema: public; Owner: test
+--
+
+CREATE TABLE public.zoopla (
+    postcode character varying(10) NOT NULL,
+    average_sold_price_1year integer,
+    average_sold_price_3year integer,
+    average_sold_price_5year integer,
+    average_sold_price_7year integer,
+    number_of_sales_1year integer,
+    number_of_sales_3year integer,
+    number_of_sales_7year integer,
+    number_of_sales_5year integer,
+    county text,
+    turnover double precision
+);
+
+
+ALTER TABLE public.zoopla OWNER TO test;
+
+--
+-- Name: agents id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.agents ALTER COLUMN id SET DEFAULT nextval('public.agents_id_seq'::regclass);
+
+
+--
+-- Name: categories id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.categories_id_seq'::regclass);
+
+
+--
+-- Name: features id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.features ALTER COLUMN id SET DEFAULT nextval('public.features_id_seq'::regclass);
+
+
+--
+-- Name: message id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.message ALTER COLUMN id SET DEFAULT nextval('public.message_id_seq'::regclass);
+
+
+--
+-- Name: messages id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.messages ALTER COLUMN id SET DEFAULT nextval('public.messages_id_seq'::regclass);
+
+
+--
+-- Name: properties id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.properties ALTER COLUMN id SET DEFAULT nextval('public.properties_id_seq'::regclass);
+
+
+--
+-- Name: signup id; Type: DEFAULT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.signup ALTER COLUMN id SET DEFAULT nextval('public.signup_id_seq'::regclass);
+
+
+--
+-- Data for Name: agents; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.agents (id, firstname, lastname, username, about, dateregistered, password, passwordsalt, email, picture_url, phone, role, verified, verify_token, verify_token_expire) FROM stdin;
+7			filip33322211	Hello my name is Filip	2020-10-14 14:28:44.526277+01	$2b$10$pUBYraVTmWExesHqDuVcEetB6TXvD0fyXR9P6zXrRm61LRitymsm2	$2b$10$pUBYraVTmWExesHqDuVcEe	filip231331@gmail.com	./public/avatars/agent_filip33322211.png	+440903828282	agent	t	\N	\N
+95	\N	\N	prosovskyf	\N	2020-11-28 17:58:30.263919+00	$2b$10$GbMe6s/PznsA0kTUf6hST.5QzEWXOl4NQaNs57B5yXWSXjLpQeSCC	$2b$10$GbMe6s/PznsA0kTUf6hST.	prosovsky.f@gmail.com	\N	\N	user	t	\N	\N
+\.
+
+
+--
+-- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.categories (id, name, description, image_url) FROM stdin;
+80	Terraced	Description about terraced category	./public/category/images/Terraced/image_0.jpeg
+\.
+
+
+--
+-- Data for Name: features; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.features (id, feature, property_id) FROM stdin;
+188	Garden	78
+189	Pool	78
+190	Garage	78
+191	Balcony	79
+192	Storage room	79
+\.
+
+
+--
+-- Data for Name: message; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.message (id, property_id, subject, agent_name, user_name, archived_agent, archived_user, del_for_user, del_for_agent, updated_time) FROM stdin;
+\.
+
+
+--
+-- Data for Name: messages; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.messages (id, date, message, message_thread, author) FROM stdin;
+\.
+
+
+--
+-- Data for Name: properties; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.properties (id, title, description, created, modified, image_url, video_url, published, price, high_priority, agent_id, category_id, location, under_offer) FROM stdin;
+79	Flat in the city center | 3 bedrooms	New flat with beautiful view from 3rd floor	2020-11-28 17:22:10.742877+00	2020-11-28 17:33:57.988878+00	./public/79/images/	\N	t	320000	f	7	80	London	f
+78	Family house 3-bedrooms	New family house in quiet location	2020-11-28 16:48:10.525364+00	2020-11-28 17:30:28.103792+00	./public/78/images/	./public/78/video/	t	219000	f	7	80	CV13EG, Coventry	f
+\.
+
+
+--
+-- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.roles (name, description) FROM stdin;
+agent	\N
+admin	\N
+user	\N
+\.
+
+
+--
+-- Data for Name: signup; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.signup (id, code, code_salt) FROM stdin;
+1	$2b$10$AnP7zJGb3dbatb.sqog78etNkV0inCtYTDJKv9vzVlKCRDsAr0WGm	$2b$10$AnP7zJGb3dbatb.sqog78e
+\.
+
+
+--
+-- Data for Name: views; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.views (id, views) FROM stdin;
+79	1
+78	9
+\.
+
+
+--
+-- Data for Name: zoopla; Type: TABLE DATA; Schema: public; Owner: test
+--
+
+COPY public.zoopla (postcode, average_sold_price_1year, average_sold_price_3year, average_sold_price_5year, average_sold_price_7year, number_of_sales_1year, number_of_sales_3year, number_of_sales_7year, number_of_sales_5year, county, turnover) FROM stdin;
+cv13eg	219638	213818	204281	195628	14354	79000	224392	154296	West Midlands	11.1
+e1	666160	634787	619980	590939	26231	141252	487875	296996	London	8.7
+CV1	219638	213818	204281	195628	14354	79000	224392	154296	West Midlands	11.1
+cv1	219638	213818	204281	195628	14354	79000	224392	154296	West Midlands	11.1
+CV3	219638	213818	204281	195628	14354	79000	224392	154296	West Midlands	11.1
+E1	666160	634787	619980	590939	26231	141252	487875	296996	London	8.7
+G2	178654	177211	170965	166939	10766	47767	117841	84433	Glasgow	14.8
+Cv5	219638	213818	204281	195628	14354	79000	224392	154296	West Midlands	11.1
+Cv1	219638	213818	204281	195628	14354	79000	224392	154296	West Midlands	11.1
+\.
+
+
+--
+-- Name: agents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.agents_id_seq', 95, true);
+
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.categories_id_seq', 80, true);
+
+
+--
+-- Name: features_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.features_id_seq', 192, true);
+
+
+--
+-- Name: message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.message_id_seq', 7, true);
+
+
+--
+-- Name: messages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.messages_id_seq', 103, true);
+
+
+--
+-- Name: properties_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.properties_id_seq', 79, true);
+
+
+--
+-- Name: signup_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+--
+
+SELECT pg_catalog.setval('public.signup_id_seq', 1, true);
+
+
+--
+-- Name: agents PK_agents; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.agents
+    ADD CONSTRAINT "PK_agents" PRIMARY KEY (id);
+
+
+--
+-- Name: categories PK_categories; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT "PK_categories" PRIMARY KEY (id);
+
+
+--
+-- Name: features PK_features; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.features
+    ADD CONSTRAINT "PK_features" PRIMARY KEY (id);
+
+
+--
+-- Name: messages PK_messages; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT "PK_messages" PRIMARY KEY (id);
+
+
+--
+-- Name: properties PK_properties; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT "PK_properties" PRIMARY KEY (id);
+
+
+--
+-- Name: roles PK_roles; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.roles
+    ADD CONSTRAINT "PK_roles" PRIMARY KEY (name);
+
+
+--
+-- Name: views PK_views; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.views
+    ADD CONSTRAINT "PK_views" PRIMARY KEY (id);
+
+
+--
+-- Name: agents agents_email_key; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.agents
+    ADD CONSTRAINT agents_email_key UNIQUE (email);
+
+
+--
+-- Name: agents agents_username_key; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.agents
+    ADD CONSTRAINT agents_username_key UNIQUE (username);
+
+
+--
+-- Name: message message_pk; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.message
+    ADD CONSTRAINT message_pk PRIMARY KEY (id);
+
+
+--
+-- Name: zoopla zoopla_pk; Type: CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.zoopla
+    ADD CONSTRAINT zoopla_pk PRIMARY KEY (postcode);
+
+
+--
+-- Name: categories_name_uindex; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE UNIQUE INDEX categories_name_uindex ON public.categories USING btree (name);
+
+
+--
+-- Name: fkIdx_agents; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_agents" ON public.properties USING btree (agent_id);
+
+
+--
+-- Name: fkIdx_agents_messages; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_agents_messages" ON public.message USING btree (agent_name);
+
+
+--
+-- Name: fkIdx_author; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_author" ON public.messages USING btree (author);
+
+
+--
+-- Name: fkIdx_categories; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_categories" ON public.properties USING btree (category_id);
+
+
+--
+-- Name: fkIdx_message_thread; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_message_thread" ON public.messages USING btree (message_thread);
+
+
+--
+-- Name: fkIdx_properties; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_properties" ON public.features USING btree (property_id);
+
+
+--
+-- Name: fkIdx_properties_views; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_properties_views" ON public.views USING btree (id);
+
+
+--
+-- Name: fkIdx_roles; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_roles" ON public.agents USING btree (role);
+
+
+--
+-- Name: fkIdx_users_messages; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE INDEX "fkIdx_users_messages" ON public.message USING btree (user_name);
+
+
+--
+-- Name: zoopla_postcode_uindex; Type: INDEX; Schema: public; Owner: test
+--
+
+CREATE UNIQUE INDEX zoopla_postcode_uindex ON public.zoopla USING btree (postcode);
+
+
+--
+-- Name: properties update_changetimestamp; Type: TRIGGER; Schema: public; Owner: test
+--
+
+CREATE TRIGGER update_changetimestamp BEFORE UPDATE ON public.properties FOR EACH ROW EXECUTE FUNCTION public.update_modified_column();
+
+
+--
+-- Name: properties FK_agents; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT "FK_agents" FOREIGN KEY (agent_id) REFERENCES public.agents(id);
+
+
+--
+-- Name: message FK_agents; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.message
+    ADD CONSTRAINT "FK_agents" FOREIGN KEY (agent_name) REFERENCES public.agents(username);
+
+
+--
+-- Name: messages FK_author; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT "FK_author" FOREIGN KEY (author) REFERENCES public.agents(username);
+
+
+--
+-- Name: properties FK_categories; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.properties
+    ADD CONSTRAINT "FK_categories" FOREIGN KEY (category_id) REFERENCES public.categories(id);
+
+
+--
+-- Name: messages FK_message_thread; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT "FK_message_thread" FOREIGN KEY (message_thread) REFERENCES public.message(id);
+
+
+--
+-- Name: features FK_properties; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.features
+    ADD CONSTRAINT "FK_properties" FOREIGN KEY (property_id) REFERENCES public.properties(id);
+
+
+--
+-- Name: views FK_properties; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.views
+    ADD CONSTRAINT "FK_properties" FOREIGN KEY (id) REFERENCES public.properties(id);
+
+
+--
+-- Name: agents FK_roles; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.agents
+    ADD CONSTRAINT "FK_roles" FOREIGN KEY (role) REFERENCES public.roles(name);
+
+
+--
+-- Name: message FK_users; Type: FK CONSTRAINT; Schema: public; Owner: test
+--
+
+ALTER TABLE ONLY public.message
+    ADD CONSTRAINT "FK_users" FOREIGN KEY (user_name) REFERENCES public.agents(username);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

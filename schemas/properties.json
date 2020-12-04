@@ -1,0 +1,131 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "property": {
+            "$id": "/property",
+            "title": "Property",
+            "description": "Property data",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Title of the property"
+                },
+                "description": {
+                    "description": "Summary about property",
+                    "default": null,
+                    "type": "string"
+                },
+                "image_url": {
+                    "description": "Path to images on backend server",
+                    "type": "string",
+                    "default": null,
+                    "format": "uri"
+                },
+                "video_url": {
+                    "description": "Path to video on backend server",
+                    "default": null,
+                    "type": "string",
+                    "format": "uri"
+                },
+                "published": {
+                    "description": "Value if property is published and visible for public",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "price": {
+                    "description": "Price of the property"
+                },
+                "high_priority": {
+                    "description": "Value if property is checked as high priority",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "agent_id": {
+                    "description": "ID of agent who created the Property",
+                    "type": "integer"
+                },
+                "category_id": {
+                    "description": "ID of category to which property was assigned",
+                    "type": "integer"
+                },
+                "location": {
+                    "description": "Location of the property",
+                    "default": null,
+                    "type": "string"
+                },
+                "under_offer": {
+                    "description": "If the property is checked as under offer",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "title",
+                "price"
+            ]
+        },
+        "propertyView": {
+            "$id": "/propertyView",
+            "title": "Property view",
+            "description": "Listed property",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Title of the property"
+                },
+                "description": {
+                    "description": "Summary about property",
+                    "default": null,
+                    "type": "string"
+                },
+                "image_url": {
+                    "description": "Path to images on backend server",
+                    "default": null,
+                    "type": "string",
+                    "format": "uri"
+                },
+                "video_url": {
+                    "description": "Path to video on backend server",
+                    "default": null,
+                    "type": "string",
+                    "format": "uri"
+                },
+                "published": {
+                    "description": "Value if property is published and visible for public",
+                    "type": "boolean"
+                },
+                "price": {
+                    "description": "Price of the property",
+                    "type": "integer"
+                },
+                "high_priority": {
+                    "description": "Value if property is checked as high priority",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "agent_id": {
+                    "description": "ID of agent who created the Property",
+                    "type": "integer"
+                },
+                "category_id": {
+                    "description": "ID of category to which property was assigned",
+                    "type": "integer"
+                },
+                "location": {
+                    "description": "Location of the property",
+                    "default": null,
+                    "type": "string"
+                },
+                "under_offer": {
+                    "description": "If the property is checked as under offer",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

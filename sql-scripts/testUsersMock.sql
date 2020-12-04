@@ -1,0 +1,3 @@
+INSERT INTO agents(username, password, passwordsalt, email, verified, role) VALUES('testuser', '$2b$10$soPayt2D.xJINWZ..IupguRqgxXubwANoe.D/TFIu/iqIBeKy2RsC', '$2b$10$soPayt2D.xJINWZ..Iupgu', 'notexistinguser@notexistingemail.com', true, 'user');
+INSERT INTO agents(username, password, passwordsalt, email, verified, role) VALUES('testagent', '$2b$10$soPayt2D.xJINWZ..IupguRqgxXubwANoe.D/TFIu/iqIBeKy2RsC', '$2b$10$soPayt2D.xJINWZ..Iupgu', 'notexistingagent@notexistingemail.com', true, 'agent');
+INSERT INTO agents(username, password, passwordsalt, email, verified, role) VALUES('testuser3', '$2b$10$soPayt2D.xJINWZ..IupguRqgxXubwANoe.D/TFIu/iqIBeKy2RsC', '$2b$10$soPayt2D.xJINWZ..Iupgu', 'notexistinguser3@notexistingemail.com', true, 'user');

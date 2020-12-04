@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/verification.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/verification.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* A module with defined api endpoints for verification process
+* @module routes/verification
+* @author Filip Prosovsky
+*/
+
+/** Package definitions */
+const Router = require('koa-router');
+const router = Router({ prefix: '/api/v1/verification' });
+const bodyParser = require('koa-bodyparser');
+
+/** Load other modules */
+const verification = require('../models/verification')
+const crypt = require('../helpers/crypt')
+const agent = require('../models/agents');
+
+/** Route endpoints */
+router.get('/', verifyToken)
+router.get('/resend', resendToken)
+router.get('/resetpass', resetPass)
+router.post('/changepass', bodyParser(), changePass)
+
+/**
+ * Function to verify user account after sign up
+ * Checks if token is still valid and activate account
+ * If token is expired, it will send link to re-send activation link to user's email
+ * @param {object} ctx - Koa req/res context object
+ * @returns {integer | object | string} object - message and link, string - message, integer - http status
+ */
+async function verifyToken(ctx) {
+  try {
+    let username = ctx.request.query.username
+    let token = ctx.request.query.token
+    let results = await verification.getToken(username)
+    if (results) {
+      let dbToken = results[0].verify_token
+      let token_exp = results[0].verify_token_expire
+      var currentDate = new Date()
+      if ((dbToken === token) &amp;&amp; (currentDate &lt; token_exp)) {
+        await verification.verified(username)
+        ctx.status = 200;
+        ctx.body = 'Account activated, you will be redirected to login'
+      }
+      else if ((dbToken === token) &amp;&amp; (currentDate > token_exp)) {
+        ctx.status = 498;
+        ctx.body = {
+          text: 'Token is expired. Please press "resend activation link"',
+          link: `http://localhost:3005/api/v1/verification/resend?username=${username}`
+        }
+      }
+      else {
+        ctx.status = 400;
+        ctx.body = 'Not valid, you will be redirected to homepage'
+
+      }
+    }
+    else {
+      ctx.status = 400;
+      ctx.body = 'Not valid, you will be redirected to homepage'
+    }
+  }
+  catch (e) {
+    ctx.status = 500
+    ctx.body = 'Problem occured'
+  }
+}
+
+/**
+ * Function to resend activation token
+ * Generate new token and store in DB with expire time
+ * Send activation link to email
+ * @param {object} ctx - Koa req/res context object
+ * @returns {integer | string} string - message, integer - http status
+ */
+async function resendToken(ctx) {
+  let username = ctx.request.query.username
+  let token = await crypt.gen();
+  var expire = new Date()
+  expire.setHours(expire.getHours() + 48)
+  await verification.saveNewToken(token, expire, username);
+  let userMail = (await agent.viewAgentByUsername(username))[0].email
+  await verification.sendVerification(userMail, username, token);
+  ctx.status = 200;
+  ctx.body = 'Activation link was re-sent, please confirm in 48 hours'
+}
+
+/**
+ * Function to validate token for password reset
+ * Check if token is valid, if it is allow to fill new password
+ * @param {object} ctx - Koa req/res context object
+ * @returns {integer | string} string - message, integer - http status
+ */
+async function resetPass(ctx) {
+  try {
+    let username = ctx.request.query.username
+    let token = ctx.request.query.token
+    let results = await verification.getToken(username)
+    let dbToken = results[0].verify_token
+    let token_exp = results[0].verify_token_expire
+    var currentDate = new Date()
+    if ((dbToken === token) &amp;&amp; (currentDate &lt; token_exp)) {
+      ctx.status = 200;
+      ctx.body = 'Please fill your new password and click the button'
+    }
+    else if ((dbToken === token) &amp;&amp; (currentDate > token_exp)) {
+      ctx.status = 400;
+      ctx.body = 'Link expired, please reset your password again'
+
+    }
+    else {
+      ctx.status = 400;
+      ctx.body = 'Not valid request, you will be redirected to homepage'
+    }
+  }
+  catch (e) {
+    ctx.status = 500;
+    ctx.body = 'Problem occured'
+  }
+}
+
+
+/**
+ * Function to enter new password after reset
+ * Check if token is valid once again, get new password
+ * Hash that password, store it in the database and activate account
+ * @param {object} ctx - Koa req/res context object
+ * @returns {integer | string} string - message, integer - http status
+ */
+async function changePass(ctx) {
+  try {
+    let username = ctx.request.query.username
+    let token = ctx.request.query.token
+    let results = await verification.getToken(username)
+    let dbToken = results[0].verify_token
+    let token_exp = results[0].verify_token_expire
+    var currentDate = new Date()
+    if ((dbToken === token) &amp;&amp; (currentDate &lt; token_exp)) {
+      let password = ctx.request.body.secret
+      if (await crypt.validatePassword(password)) {
+        let secrets = await crypt.hashSecret(password);
+        let userId = (await agent.viewAgentByUsername(username))[0].id
+        await agent.updatePassword(userId, secrets.password, secrets.passwordsalt)
+        await verification.verified(username)
+        ctx.status = 200;
+        ctx.body = 'Your password was changed, you will be redirected to login'
+      }
+      else {
+        ctx.status = 405;
+        ctx.body = 'Password is not strong enough'
+      }
+    }
+    else {
+      ctx.status = 400;
+      ctx.body = 'Not valid request, you will be redirected to homepage'
+    }
+  }
+  catch (e) {
+    ctx.status = 500
+    ctx.body = 'Problem occured'
+  }
+}
+
+module.exports = router;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_crypt.html">helpers/crypt</a></li><li><a href="module-helpers_db.html">helpers/db</a></li><li><a href="module-helpers_isAgent.html">helpers/isAgent</a></li><li><a href="module-models_agents.html">models/agents</a></li><li><a href="module-models_files.html">models/files</a></li><li><a href="module-models_messages.html">models/messages</a></li><li><a href="module-models_properties.html">models/properties</a></li><li><a href="module-models_propertiesAgent.html">models/propertiesAgent</a></li><li><a href="module-models_propertyCategory.html">models/propertyCategory</a></li><li><a href="module-models_propertyFeatures.html">models/propertyFeatures</a></li><li><a href="module-models_propertyViews.html">models/propertyViews</a></li><li><a href="module-models_signup.html">models/signup</a></li><li><a href="module-models_verification.html">models/verification</a></li><li><a href="module-models_zoopla.html">models/zoopla</a></li><li><a href="module-permissions_agents.html">permissions/agents</a></li><li><a href="module-permissions_categories.html">permissions/categories</a></li><li><a href="module-permissions_features.html">permissions/features</a></li><li><a href="module-permissions_messages.html">permissions/messages</a></li><li><a href="module-permissions_propertiesAgent.html">permissions/propertiesAgent</a></li><li><a href="module-routes_agents.html">routes/agents</a></li><li><a href="module-routes_categories.html">routes/categories</a></li><li><a href="module-routes_features.html">routes/features</a></li><li><a href="module-routes_files.html">routes/files</a></li><li><a href="module-routes_login.html">routes/login</a></li><li><a href="module-routes_messages.html">routes/messages</a></li><li><a href="module-routes_properties.html">routes/properties</a></li><li><a href="module-routes_propertiesAgent.html">routes/propertiesAgent</a></li><li><a href="module-routes_signup.html">routes/signup</a></li><li><a href="module-routes_verification.html">routes/verification</a></li><li><a href="module-routes_zoopla.html">routes/zoopla</a></li><li><a href="module-scripts_hash_signupcode.html">scripts/hash_signupcode</a></li><li><a href="module-strategies_basicAuth.html">strategies/basicAuth</a></li><li><a href="module-strategies_jwt.html">strategies/jwt</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Tue Dec 01 2020 18:24:08 GMT+0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

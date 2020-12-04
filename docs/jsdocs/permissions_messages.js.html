@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: permissions/messages.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: permissions/messages.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* A module with defined access control policies to perform operations on messages
+* @module permissions/messages
+* @author Filip Prosovsky
+* @see routes/* where these ACLs are being used
+*/
+
+const AccessControl = require('role-acl');
+const ac = new AccessControl();
+
+
+/** Grant permission to agent  */
+ac.grant('agent').condition({Fn:'EQUALS', args: {'requester':'$.owner'}})
+    .execute('read').on('thread')
+    .execute('update').on('thread')
+    .execute('delete').on('thread')
+    .execute('read').on('messages')
+    .execute('create').on('messages');
+
+/** Grant permission to user  */
+ac.grant('user').condition({Fn:'EQUALS', args: {'requester':'$.owner'}})
+    .execute('read').on('thread')
+    .execute('update').on('thread')
+    .execute('delete').on('thread')
+    .execute('read').on('messages')
+    .execute('create').on('messages');
+
+/** Grant permission to admin  */
+ac.grant('admin').execute('*').on('thread');
+ac.grant('admin').execute('*').on('messages');
+
+
+/**
+ * Models to check user role and compare to owner of data requested to perform specific operations
+ * @param {object} object - requester data
+ * @param {object} object - resource data
+ * @returns {boolean} boolean - true/false
+ */
+exports.readThreads = (requester, data) =>
+ac.can(requester.role).context({requester:requester.user, owner:data[`${requester.role}`+`_name`]})
+    .execute('read').sync().on('thread');
+
+exports.readMessages = (requester, data) =>
+ac.can(requester.role).context({requester:requester.user, owner:data[`${requester.role}`+`_name`]})
+    .execute('read').sync().on('messages');
+
+exports.send = (requester, data) =>
+ac.can(requester.role).context({requester:requester.user, owner:data[`${requester.role}`+`_name`]})
+    .execute('create').sync().on('messages');
+
+exports.update = (requester, data) =>
+ac.can(requester.role).context({requester:requester.user, owner:data[`${requester.role}`+`_name`]})
+    .execute('update').sync().on('thread');
+
+exports.delete = (requester, data) =>
+ac.can(requester.role).context({requester:requester.user, owner:data[`${requester.role}`+`_name`]})
+    .execute('delete').sync().on('thread');
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_crypt.html">helpers/crypt</a></li><li><a href="module-helpers_db.html">helpers/db</a></li><li><a href="module-helpers_isAgent.html">helpers/isAgent</a></li><li><a href="module-models_agents.html">models/agents</a></li><li><a href="module-models_files.html">models/files</a></li><li><a href="module-models_messages.html">models/messages</a></li><li><a href="module-models_properties.html">models/properties</a></li><li><a href="module-models_propertiesAgent.html">models/propertiesAgent</a></li><li><a href="module-models_propertyCategory.html">models/propertyCategory</a></li><li><a href="module-models_propertyFeatures.html">models/propertyFeatures</a></li><li><a href="module-models_propertyViews.html">models/propertyViews</a></li><li><a href="module-models_signup.html">models/signup</a></li><li><a href="module-models_verification.html">models/verification</a></li><li><a href="module-models_zoopla.html">models/zoopla</a></li><li><a href="module-permissions_agents.html">permissions/agents</a></li><li><a href="module-permissions_categories.html">permissions/categories</a></li><li><a href="module-permissions_features.html">permissions/features</a></li><li><a href="module-permissions_messages.html">permissions/messages</a></li><li><a href="module-permissions_propertiesAgent.html">permissions/propertiesAgent</a></li><li><a href="module-routes_agents.html">routes/agents</a></li><li><a href="module-routes_categories.html">routes/categories</a></li><li><a href="module-routes_features.html">routes/features</a></li><li><a href="module-routes_files.html">routes/files</a></li><li><a href="module-routes_login.html">routes/login</a></li><li><a href="module-routes_messages.html">routes/messages</a></li><li><a href="module-routes_properties.html">routes/properties</a></li><li><a href="module-routes_propertiesAgent.html">routes/propertiesAgent</a></li><li><a href="module-routes_signup.html">routes/signup</a></li><li><a href="module-routes_verification.html">routes/verification</a></li><li><a href="module-routes_zoopla.html">routes/zoopla</a></li><li><a href="module-scripts_hash_signupcode.html">scripts/hash_signupcode</a></li><li><a href="module-strategies_basicAuth.html">strategies/basicAuth</a></li><li><a href="module-strategies_jwt.html">strategies/jwt</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Tue Dec 01 2020 18:24:08 GMT+0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

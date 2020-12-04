@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "feature": {
+            "$id": "/feature",
+            "description": "Feature of the property",
+            "title": "Feature",
+            "type": "object",
+            "properties": {
+                "feature": {
+                    "description": "Unique name of the feature",
+                    "type": "array"
+                },
+                "property_id": {
+                    "description": "ID of the property feature is assigned to",
+                    "type": "integer"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "feature"
+            ]
+        },
+        "featureView": {
+            "$id": "/featureView",
+            "description": "Feature view of the property",
+            "title": "Feature view",
+            "type": "object",
+            "properties": {
+                "feature": {
+                    "description": "Unique name of the feature",
+                    "type": "array"
+                },
+                "property_id": {
+                    "description": "ID of the property feature is assigned to",
+                    "type": "integer"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

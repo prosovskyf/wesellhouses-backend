@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/validation.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/validation.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * A module to run JSON schema validation on req/res
+ * @module controllers/validation
+ * @author Filip Prosovsky
+ * @see schemas/* for JSON schemas defined
+ */
+const { Validator, ValidationError } = require('jsonschema');
+const agentSchema = require('../schemas/agents.json').definitions.agent
+const agentUpdateSchema = require('../schemas/agents.json').definitions.agentUpdate
+const categorySchema = require('../schemas/categories.json').definitions.category;
+const featureSchema = require('../schemas/features.json').definitions.feature;
+const messageSchema = require('../schemas/messages.json').definitions.messageSend;
+const messageFirstSchema = require('../schemas/messages.json').definitions.messageSendFirst;
+const propertySchema = require('../schemas/properties.json').definitions.property;
+
+/**
+ * Wrapper of validator to be used as a middleware
+ * @param {object} schema - JSON schema definition for specific resource
+ * @param {string} resource - The name of the resource ('property')
+ * @returns {function} - A Koa middleware handler taking (ctx, next) params
+ */
+function makeValidator(schema, resource) {
+
+    const v = new Validator();
+    const validationOptions = {
+        throwError: true,
+        propertyName: resource
+    };
+
+  /**
+   * Actual middleware function to be used in validation
+   * @param {object} ctx - Koa req/res context object
+   * @param {function} next - Koa next callback
+   * @throws {ValidationError} a jsonschema library exception
+   */
+    async function handler(ctx, next) {
+
+        const body = ctx.request.body;
+
+        try {
+            v.validate(body, schema, validationOptions);
+            await next();
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                ctx.status = 400
+                ctx.body = error.stack;
+            } else {
+                throw error;
+            }
+        }
+    }
+    return handler;
+}
+
+/** Validate data against agent schema */
+exports.validateAgent = makeValidator(agentSchema, 'agent');
+exports.validateAgentUpdate = makeValidator(agentUpdateSchema, 'agentUpdate');
+/** Validate data against category schema */
+exports.validateCategory = makeValidator(categorySchema, 'category');
+/** Validate data against features schema */
+exports.validateFeature = makeValidator(featureSchema, 'feature');
+/** Validate data against messages schema */
+exports.validateFirstMessage = makeValidator(messageFirstSchema, 'messageSendFirst');
+exports.validateMessage = makeValidator(messageSchema, 'messageSend');
+/** Validate data against property schema */
+exports.validateProperty = makeValidator(propertySchema, 'property');</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_crypt.html">helpers/crypt</a></li><li><a href="module-helpers_db.html">helpers/db</a></li><li><a href="module-helpers_isAgent.html">helpers/isAgent</a></li><li><a href="module-models_agents.html">models/agents</a></li><li><a href="module-models_files.html">models/files</a></li><li><a href="module-models_messages.html">models/messages</a></li><li><a href="module-models_properties.html">models/properties</a></li><li><a href="module-models_propertiesAgent.html">models/propertiesAgent</a></li><li><a href="module-models_propertyCategory.html">models/propertyCategory</a></li><li><a href="module-models_propertyFeatures.html">models/propertyFeatures</a></li><li><a href="module-models_propertyViews.html">models/propertyViews</a></li><li><a href="module-models_signup.html">models/signup</a></li><li><a href="module-models_verification.html">models/verification</a></li><li><a href="module-models_zoopla.html">models/zoopla</a></li><li><a href="module-permissions_agents.html">permissions/agents</a></li><li><a href="module-permissions_categories.html">permissions/categories</a></li><li><a href="module-permissions_features.html">permissions/features</a></li><li><a href="module-permissions_messages.html">permissions/messages</a></li><li><a href="module-permissions_propertiesAgent.html">permissions/propertiesAgent</a></li><li><a href="module-routes_agents.html">routes/agents</a></li><li><a href="module-routes_categories.html">routes/categories</a></li><li><a href="module-routes_features.html">routes/features</a></li><li><a href="module-routes_files.html">routes/files</a></li><li><a href="module-routes_login.html">routes/login</a></li><li><a href="module-routes_messages.html">routes/messages</a></li><li><a href="module-routes_properties.html">routes/properties</a></li><li><a href="module-routes_propertiesAgent.html">routes/propertiesAgent</a></li><li><a href="module-routes_signup.html">routes/signup</a></li><li><a href="module-routes_verification.html">routes/verification</a></li><li><a href="module-routes_zoopla.html">routes/zoopla</a></li><li><a href="module-scripts_hash_signupcode.html">scripts/hash_signupcode</a></li><li><a href="module-strategies_basicAuth.html">strategies/basicAuth</a></li><li><a href="module-strategies_jwt.html">strategies/jwt</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Tue Dec 01 2020 18:24:08 GMT+0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
