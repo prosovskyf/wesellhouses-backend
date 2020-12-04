@@ -1,5 +1,5 @@
-# 304CEM-backend
-Project coursework for 304CEM - backend - We Sell Houses
+# WeSellHouses backend
+Project coursework - backend - We Sell Houses
 <br>
 API (npm start): /api/v1/ 
 <br>
@@ -10,7 +10,7 @@ Tests: npm test
 To set up database, follow 'Docker - Database set up'
 
 # To view frontend repository
-[We Sell Houses frontend](https://github.coventry.ac.uk/304CEM-2021SEPJAN/304CEM-frontend)
+[We Sell Houses frontend](https://github.com/prosovskyf/wesellhouses-frontend)
 
 # Documentation (npm run docs):
 <br>
