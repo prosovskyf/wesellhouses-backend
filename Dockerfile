@@ -3,7 +3,7 @@ FROM node:14
 # Create app directory
 WORKDIR /usr/src/app
 # copy package.json and lock file
-COPY package* ./
+COPY package.json ./
 # install dependecies needed (for sharp package) and run npm install
 RUN apt-get update && apt-get install -y build-essential && apt-get install -y python && apt-get install -y postgresql-client && npm install
 # copy all other files
