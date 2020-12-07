@@ -1,5 +1,5 @@
-# WeSellHouses backend
-Project coursework - backend - We Sell Houses
+# 304CEM-backend
+Project coursework for 304CEM - backend - We Sell Houses
 <br>
 API (npm start): /api/v1/ 
 <br>
@@ -10,7 +10,7 @@ Tests: npm test
 To set up database, follow 'Docker - Database set up'
 
 # To view frontend repository
-[We Sell Houses frontend](https://github.com/prosovskyf/wesellhouses-frontend)
+[We Sell Houses frontend](https://github.coventry.ac.uk/304CEM-2021SEPJAN/304CEM-frontend)
 
 # Documentation (npm run docs):
 <br>
@@ -30,5 +30,5 @@ PGPASSWORD=USER_PASS PGUSER=ROLE_USER psql -h HOSTNAME wesellhouses < db_data
 <br>
 Run: docker run  -p 8080:8080 -p 3005:3005 -p 3030:3030 YOUR_NAME/wesellhouses-backend:latest
 <br>
-This will run API on 3005, docs on 3030 and static file server on 8080 as temporary solution for file storage. (npm test works only when run from host not in docker - this is due current db set up not running in docker)
+This will run API on 3005, docs on 3030 and static file server on 8080 as temporary solution for file storage. (npm test works as well in docker because postgresql client is installed, DB can be controlled using regular psql commands - specify the values in package.json file for tests)
     

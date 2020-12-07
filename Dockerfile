@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 # copy package.json and lock file
 COPY package* ./
 # install dependecies needed (for sharp package) and run npm install
-RUN apt-get update && apt-get install -y build-essential && apt-get install -y python && npm install
+RUN apt-get update && apt-get install -y build-essential && apt-get install -y python && apt-get install -y postgresql-client && npm install
 # copy all other files
 COPY . .
 # install http-server (file hosting)
