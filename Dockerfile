@@ -13,6 +13,7 @@ RUN npm install http-server
 # env variables
 ENV host=host.docker.internal
 ENV user=DB_USER
+ENV port=DB_PORT
 ENV password=DB_PASS
 ENV database=DATABASE
 ENV secret=RANDOM_SECRET

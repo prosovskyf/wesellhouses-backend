@@ -10,7 +10,7 @@ const pgp = require('pg-promise')();
 /**  Connection variables */
 const cn = {
     host: process.env.host,
-    port: 5432,
+    port: process.env.port,
     database: process.env.database,
     user: process.env.user,
     password: process.env.password
