@@ -43,6 +43,10 @@
                 "password": {
                     "description": "Password for the user",
                     "type": "string"
+                },
+                "sign_up_code": {
+                    "description": "Agent sign up code",
+                    "type": "string"
                 }
             },
             "required": [
